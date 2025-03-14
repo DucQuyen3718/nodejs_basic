@@ -1,28 +1,36 @@
-import connection from "../configs/connectDB"
+import pool from "../configs/connectDB"
 
-let getHomePage = (req, res) => {
-    //logic 
-    let data = []
-    connection.query(
-        'SELECT * FROM `users`',
-        function (err, results, fields) {
-            // console.log('>>> check mysql')
-            // console.log(results); // results contains rows returned by server
-            results.map((row) => {
-                data.push({
-                    id: row.id,
-                    email: row.email,
-                    address: row.address,
-                    firstName: row.firstName,
-                    lastName: row.lastName
-                })
-            })
-            return res.render('../views/index.ejs', { dataUser: data })
+let getHomePage = async (req, res) => {
 
-        }
+    const [rows, fields] = await pool.execute(
+        'SELECT * FROM users'
     );
+    return res.render('../views/index.ejs', { dataUser: rows })
 }
 
+let getDetailPage = async (req, res) => {
+    let userID = req.params.id;
+    await pool.execute(`SELECT * FROM users where id = ?`, [userID])
+    //let [user] = 
+    // console.log('check req params: ', user)
+    // return res.send(JSON.stringify(user))
+}
+
+let createNewUser = async (req, res) => {
+    // console.log('Check req: ', req.body)
+    let { firstName, lastName, email, address } = req.body
+    await pool.execute(
+        `INSERT INTO users(firstName, lastName, email, address) values(?, ?, ?, ?)`,
+        [firstName, lastName, email, address]
+    )
+    return res.redirect('/')
+}
+
+
+
+
 module.exports = {
-    getHomePage
+    getHomePage,
+    getDetailPage,
+    createNewUser
 }

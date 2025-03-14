@@ -9,6 +9,9 @@ const app = express()
 const port = process.env.PORT || 8080;
 
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 // set up view engine
 configViewEngine(app);
 
